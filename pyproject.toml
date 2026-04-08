@@ -7,6 +7,7 @@ name = "Component Warehouse Manager"
 version = "1.0.0.dev1"
 description = "元件仓库管理器"
 authors = ["Fantastair <Fantastair@qq.com>"]
+readme = "README.md"
 license = "MIT"
 repository = "https://github.com/Fantastair/Component-Warehouse-Manager"
 classifiers = [
