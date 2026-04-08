@@ -1,0 +1,47 @@
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "Component Warehouse Manager"
+version = "1.0.0.dev1"
+description = "元件仓库管理器"
+authors = ["Fantastair <Fantastair@qq.com>"]
+license = "MIT"
+repository = "https://github.com/Fantastair/Component-Warehouse-Manager"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+typer = "^0.24.1"
+black = "^24.8.0"
+mypy = "^1.18.1"
+pylint = "^4.0.4"
+
+[tool.black]
+line-length = 88
+
+[tool.mypy]
+strict = true
+files = [
+    "server",
+    "client",
+]
+warn_unused_ignores = true
+warn_unused_configs = true
+
+[tool.pylint.main]
+jobs = 8
+
+[tool.pylint.messages_control]
+disable = []
+
+[tool.pylint.reports]
+fail-under = 9.5
