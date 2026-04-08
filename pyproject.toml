@@ -19,7 +19,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.135.3"
+fastapi = { version = "^0.135.3", extras = ["standard"] }
 
 [tool.poetry.group.dev.dependencies]
 typer = "^0.24.1"
