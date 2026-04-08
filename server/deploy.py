@@ -141,7 +141,7 @@ if not APP_PATH.exists():
 
 LOG_PATH = CWD / "server.log"
 
-subprocess.Popen(
+subprocess.Popen(  # pylint: disable=consider-using-with
     [venv_path, APP_PATH],
     start_new_session=True,
     stdout=LOG_PATH.open("w"),
