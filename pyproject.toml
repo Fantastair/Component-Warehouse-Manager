@@ -45,4 +45,4 @@ jobs = 8
 disable = []
 
 [tool.pylint.reports]
-fail-under = 9.5
+fail-under = 10.0
