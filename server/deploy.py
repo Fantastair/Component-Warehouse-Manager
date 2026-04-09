@@ -1,5 +1,6 @@
 """ 服务端部署脚本 """
 
+import os
 import sys
 import venv
 import shutil
@@ -7,11 +8,17 @@ import sqlite3
 import subprocess
 from pathlib import Path
 
+from load_dotenv import load_env
+
 CWD = Path(__file__).parent
+DOT_ENV_PATH = CWD / ".env"
+
+load_env(DOT_ENV_PATH)
 
 print("欢迎使用[元件仓储管理器]服务端部署脚本")
 print(
-    "警告：本脚本只适用于服务端初次部署，请不要在已部署的环境中运行此脚本，否则可能会导致数据丢失。"
+    "警告：本脚本只适用于服务端初次部署，请不要在已部署的环境中运行此脚本，"
+    "否则可能会导致数据丢失。"
 )
 print("是否继续？(y/n)", end=" ")
 choice = input().strip().lower()
@@ -27,7 +34,8 @@ venv_path = CWD / ".venv"
 
 if venv_path.exists():
     print(
-        f"警告：已存在运行环境({venv_path})，可能不是初次部署，将重建运行环境，是否继续？(y/n)",
+        f"警告：已存在运行环境({venv_path})，可能不是初次部署，将重建运行环境，"
+        "是否继续？(y/n)",
         end=" ",
     )
     choice = input().strip().lower()
@@ -55,7 +63,8 @@ print("初始化数据库...")
 DB_PATH = CWD / "components.db"
 if DB_PATH.exists():
     print(
-        f"警告：已存在数据库文件({DB_PATH})，可能不是初次部署，将重建数据库，是否继续？(y/n)",
+        f"警告：已存在数据库文件({DB_PATH})，可能不是初次部署，将重建数据库，"
+        "是否继续？(y/n)",
         end=" ",
     )
     choice = input().strip().lower()
@@ -149,4 +158,9 @@ subprocess.Popen(  # pylint: disable=consider-using-with
 )
 print(f"服务已启动，日志输出到: {LOG_PATH}")
 
-print("[元件仓储管理器]服务端部署已完成")
+HTTP_HOST = os.getenv("HTTP_HOST", "127.0.0.1")
+HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
+
+print(
+    f"[元件仓储管理器]服务端部署已完成，请访问 http://{HTTP_HOST}:{HTTP_PORT} 进行使用"
+)

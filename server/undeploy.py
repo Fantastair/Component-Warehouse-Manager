@@ -5,27 +5,10 @@ import sys
 import shutil
 from pathlib import Path
 
+from load_dotenv import load_env
+
 CWD = Path(__file__).parent
 DOT_ENV_PATH = CWD / ".env"
-
-
-def load_env(file_path: Path) -> None:
-    """纯标准库读取 .env 文件，加载到 os.environ"""
-    with open(file_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if "=" in line:
-                key, value = line.split("=", 1)
-                key = key.strip()
-                value = value.strip()
-                if (value.startswith('"') and value.endswith('"')) or (
-                    value.startswith("'") and value.endswith("'")
-                ):
-                    value = value[1:-1]
-                os.environ[key] = value
-
 
 load_env(DOT_ENV_PATH)
 
@@ -46,6 +29,13 @@ os.system(
     f"lsof -i :{HTTP_PORT} | grep python | awk '{{print $2}}' | xargs kill -9 2>/dev/null"
 )
 print("服务已关闭")
+
+print("是否继续清理部署文件？(y/n)", end=" ")
+choice = input().strip().lower()
+if choice != "y":
+    print("解除部署已完成，但部署文件未清理。")
+    print("如果需要，请手动删除部署目录下的文件以彻底清理。")
+    sys.exit(0)
 
 print("清理日志文件...")
 LOG_PATH = CWD / "server.log"

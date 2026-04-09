@@ -33,11 +33,12 @@ line-length = 88
 [tool.mypy]
 strict = true
 files = [
-    "server",
-    "client",
+    "server/",
+    "client/",
 ]
 warn_unused_ignores = true
 warn_unused_configs = true
+exclude = [".venv/"]
 
 [tool.pylint.main]
 jobs = 8

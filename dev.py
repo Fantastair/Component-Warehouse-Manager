@@ -1,6 +1,7 @@
 """
 开发相关的命令集合，包含代码格式化、静态类型检查、代码质量检查等功能。
 """
+
 import os
 import sys
 import atexit
@@ -20,12 +21,12 @@ CONSOLE = rich.console.Console()
 
 
 def mark_text(text: str, mark: str) -> str:
-    """ 使用 rich 的标记语法为文本添加颜色或样式 """
+    """使用 rich 的标记语法为文本添加颜色或样式"""
     return f"[{mark}]{text}[/{mark}]"
 
 
 def show_time_spent(start_time: int, end_time: int, cmd: str) -> None:
-    """ 显示命令执行的耗时，自动选择合适的时间单位 """
+    """显示命令执行的耗时，自动选择合适的时间单位"""
     units = ("ns", "µs", "ms", "s")
     unit_index = 0
     elapsed_time: float = end_time - start_time
@@ -46,7 +47,7 @@ def cmd_run(
     error_on_output: bool = False,
     cwd: Path = CWD,
 ) -> str:
-    """ 模拟命令行终端运行命令 """
+    """模拟命令行终端运行命令"""
     if error_on_output:
         capture_output = True
 
@@ -77,7 +78,7 @@ def cmd_run(
 
 
 def get_poetry_executable() -> Path | None:
-    """ 查找 Poetry 可执行文件的路径 """
+    """查找 Poetry 可执行文件的路径"""
     rich.print(mark_text(r"\[dev.py] 查找 Poetry 可执行文件", "green"))
     try:
         # 命令行查找
@@ -118,7 +119,7 @@ def get_poetry_executable() -> Path | None:
 
 
 def prep_poetry() -> Path:
-    """ 准备 Poetry，确保后续命令可以使用 Poetry 来管理依赖 """
+    """准备 Poetry，确保后续命令可以使用 Poetry 来管理依赖"""
     rich.print(mark_text(r"\[dev.py] 准备 Poetry 中", "green"))
 
     poetry_path = get_poetry_executable()
@@ -132,7 +133,7 @@ def prep_poetry() -> Path:
 
 
 def remind_switch_venv(venv_py: Path) -> None:
-    """ 提醒用户切换到虚拟环境，确保后续命令在隔离的环境中运行 """
+    """提醒用户切换到虚拟环境，确保后续命令在隔离的环境中运行"""
     if sys.executable != str(venv_py):
         rich.print(
             mark_text(
@@ -157,7 +158,7 @@ def remind_switch_venv(venv_py: Path) -> None:
 
 
 def prep_venv(poetry_path: Path, py: Path) -> Path:
-    """ 准备虚拟环境，确保后续命令在隔离的环境中运行 """
+    """准备虚拟环境，确保后续命令在隔离的环境中运行"""
     rich.print(mark_text(r"\[dev.py] 准备虚拟环境中", "green"))
 
     cmd_run([poetry_path, "env", "use", py])
@@ -173,7 +174,7 @@ def prep_venv(poetry_path: Path, py: Path) -> Path:
 
 
 def prep_deps(poetry_path: Path) -> None:
-    """ 使用 Poetry 安装项目依赖 """
+    """使用 Poetry 安装项目依赖"""
     rich.print(mark_text(r"\[dev.py] 安装开发环境依赖中", "green"))
 
     try:
@@ -186,7 +187,7 @@ def prep_deps(poetry_path: Path) -> None:
 
 
 def prep_all() -> tuple[Path, Path]:
-    """ 一键准备所有环境，确保后续命令可以顺利运行 """
+    """一键准备所有环境，确保后续命令可以顺利运行"""
     poetry_path = prep_poetry()
     venv_py = prep_venv(poetry_path, sys.executable)
     prep_deps(poetry_path)
@@ -201,7 +202,8 @@ app = typer.Typer(
 
 
 def command(func):
-    """ 装饰器，用于包装命令函数，添加统一的日志输出和错误处理 """
+    """装饰器，用于包装命令函数，添加统一的日志输出和错误处理"""
+
     @app.command()
     @wraps(func)
     def command_func(*args, **kwargs):
@@ -231,7 +233,7 @@ def command(func):
 
 
 @command
-def format(): # pylint: disable=redefined-builtin
+def format():  # pylint: disable=redefined-builtin
     """格式化代码"""
     _, venv_py = prep_all()
     rich.print(mark_text(r"\[dev.py] 格式化代码中", "green"))
@@ -271,6 +273,7 @@ def lint():
                 "client",
                 "dev.py",
                 "--output-format=colorized",
+                "--ignore=.venv",
             ]
         )
     except subprocess.CalledProcessError:
