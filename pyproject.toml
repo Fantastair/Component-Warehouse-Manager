@@ -21,6 +21,7 @@ classifiers = [
 python = "^3.12"
 fastapi = { version = "^0.135.3", extras = ["standard"] }
 python-dotenv = "^1.2.2"
+requests = "^2.33.1"
 
 [tool.poetry.group.dev.dependencies]
 typer = "^0.24.1"
