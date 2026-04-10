@@ -13,11 +13,11 @@ import fantas
 
 dotenv.load_dotenv()
 
-HTTP_HOST = os.getenv("HTTP_HOST", "127.0.0.1")
+HTTP_HOST = os.getenv("HTTP_HOST", "http://127.0.0.1")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 API_TOKEN = os.getenv("API_TOKEN")
 
-BASE_URL = f"http://{HTTP_HOST}:{HTTP_PORT}/cwm/api/v1"
+BASE_URL = f"{HTTP_HOST}:{HTTP_PORT}/cwm/api/v1"
 
 GET_API_RESPONSE = fantas.custom_event()
 

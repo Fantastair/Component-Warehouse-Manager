@@ -14,7 +14,7 @@ CWD = Path(__file__).parent
 DOT_ENV_PATH = CWD / ".env"
 dotenv.load_dotenv(DOT_ENV_PATH)
 
-HTTP_HOST = os.getenv("HTTP_HOST", "127.0.0.1")
+HTTP_HOST = os.getenv("HTTP_HOST", "http://127.0.0.1")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 PROCESS_WORKERS = int(os.getenv("PROCESS_WORKERS", "4"))
