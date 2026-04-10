@@ -161,6 +161,4 @@ print(f"服务已启动，日志输出到: {LOG_PATH}")
 HTTP_HOST = os.getenv("HTTP_HOST", "http://127.0.0.1")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 
-print(
-    f"[元件仓储管理器]服务端部署已完成，请访问 {HTTP_HOST}:{HTTP_PORT} 进行使用"
-)
+print(f"[元件仓储管理器]服务端部署已完成，请访问 {HTTP_HOST}:{HTTP_PORT} 进行使用")

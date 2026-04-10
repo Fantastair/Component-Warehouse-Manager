@@ -56,14 +56,6 @@ def login() -> bool:
         text_style=info_text_style,
         align_mode=fantas.AlignMode.CENTER,
     )
-    info_text_shadow = fantas.Text(
-        info_text.text,
-        info_text.rect.move(2, 2),
-        text_style=info_text_style.copy(),
-        align_mode=info_text.align_mode,
-    )
-    info_text_shadow.text_style.fgcolor = color.GRAY
-    linear_gradient_background.append(info_text_shadow)
     linear_gradient_background.append(info_text)
 
     login_button_style = fantas.LabelStyle(
@@ -92,6 +84,24 @@ def login() -> bool:
         offset=(-10, 0),
     )
     linear_gradient_background.append(author_text)
+
+    close_button = fantas.Text(
+        chr(0xE8EE),
+        fantas.Rect(0, 0, 40, 40),
+        text_style=info_text_style.copy(),
+        align_mode=fantas.AlignMode.CENTER,
+    )
+    close_button.text_style.font = fantas.fonts.get("iconfont")
+    linear_gradient_background.append(close_button)
+
+    def on_click_close_button(event: fantas.Event) -> bool:
+        if event.ui is close_button:
+            login_window.running = False
+        return True
+
+    login_window.add_event_listener(
+        fantas.MOUSECLICKED, close_button, False, on_click_close_button
+    )
 
     verify_token_uid = None
 
