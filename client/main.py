@@ -7,6 +7,7 @@ import fantas
 
 import color
 import login_window
+import splitline
 
 import server
 
@@ -49,6 +50,22 @@ window.add_event_listener(
     fantas.WINDOWRESIZED, window.root_ui, False, redraw_background
 )
 
+split_line = splitline.SplitLine(
+    fantas.Rect(280, 0, 10, window.size[1]),
+    axis="v",
+    boundary=[200, window.size[0] - 200],
+)
+window.append(split_line)
+split_line.add_event_listeners(window)
+
+
+def split_line_dragged_callback(rect: fantas.Rect) -> None:
+    """ 分割线被拖动时的回调，调整相关UI布局 """
+    host_text.rect.width = rect.left - 20
+    host_text_shadow.rect.width = rect.left - 20
+split_line.dragged_callback = split_line_dragged_callback
+
+
 host_text_style = fantas.TextStyle(
     font=fantas.fonts.DEFAULTSYSFONT,
     size=18,
@@ -56,9 +73,9 @@ host_text_style = fantas.TextStyle(
 )
 host_text = fantas.Text(
     f"服务器：{server.HTTP_HOST}:{server.HTTP_PORT}",
-    fantas.Rect(10, 10, 300, 30),
+    fantas.Rect(10, 10, split_line.rect.left - 20, 60),
     text_style=host_text_style,
-    align_mode=fantas.AlignMode.CENTER,
+    align_mode=fantas.AlignMode.TOPLEFT,
 )
 host_text_shadow = fantas.Text(
     host_text.text,
