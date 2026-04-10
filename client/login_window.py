@@ -48,19 +48,18 @@ def login() -> bool:
     linear_gradient_background.append(title_text_shadow)
     linear_gradient_background.append(title_text)
 
-    normal_text_style = title_text_style.copy()
-    normal_text_style.size = 20
-
+    info_text_style = title_text_style.copy()
+    info_text_style.size = 20
     info_text = fantas.Text(
         f"服务器地址：{server.HTTP_HOST}\n服务器端口：{server.HTTP_PORT}",
         fantas.Rect(0, title_text.rect.bottom, login_window.size[0], 60),
-        text_style=normal_text_style,
+        text_style=info_text_style,
         align_mode=fantas.AlignMode.CENTER,
     )
     info_text_shadow = fantas.Text(
         info_text.text,
         info_text.rect.move(2, 2),
-        text_style=normal_text_style.copy(),
+        text_style=info_text_style.copy(),
         align_mode=info_text.align_mode,
     )
     info_text_shadow.text_style.fgcolor = color.GRAY
@@ -83,55 +82,47 @@ def login() -> bool:
     )
     linear_gradient_background.append(login_button)
 
-    login_flag = False
+    author_text_style = info_text_style.copy()
+    author_text_style.size = 12
+    author_text = fantas.Text(
+        "MIT License Fantastair@2026",
+        fantas.Rect(0, login_window.size[1] - 20, login_window.size[0], 20),
+        text_style=author_text_style,
+        align_mode=fantas.AlignMode.BOTTOMRIGHT,
+        offset=(-10, 0),
+    )
+    linear_gradient_background.append(author_text)
 
-    def on_login_click(event: fantas.Event) -> bool:
-        nonlocal login_flag
+    verify_token_uid = None
+
+    def on_click_login_button(event: fantas.Event) -> bool:
+        nonlocal verify_token_uid
         login_button.text = "正在验证..."
         if event.ui is login_button:
-            if server.verify_token():
+            verify_token_uid = server.api_request(server.verify_token)
+        return True
+
+    login_window.add_event_listener(
+        fantas.MOUSECLICKED, login_button, False, on_click_login_button
+    )
+
+    login_flag = False
+
+    def on_verify_return(event: fantas.Event) -> bool:
+        nonlocal login_flag
+        if event.uid == verify_token_uid:
+            if event.result:
                 login_button.text = "验证成功！"
                 login_window.running = False
                 login_flag = True
             else:
                 login_button.text = "验证失败"
-        return True
+            return True
+        return False
 
     login_window.add_event_listener(
-        fantas.MOUSECLICKED, login_button, False, on_login_click
+        server.GET_API_RESPONSE, login_window.root_ui, True, on_verify_return
     )
-
-    def on_enter_login_button(event: fantas.Event) -> bool:
-        if event.ui is login_button:
-            login_button.label_style.border_width = 4
-            login_button.offset = (0, -2)
-        return True
-
-    login_window.add_event_listener(
-        fantas.MOUSEENTERED, login_button, False, on_enter_login_button
-    )
-
-    def on_leave_login_button(event: fantas.Event) -> bool:
-        if event.ui is login_button:
-            login_button.label_style.border_width = 2
-            login_button.offset = (0, 0)
-        return True
-
-    login_window.add_event_listener(
-        fantas.MOUSELEAVED, login_button, False, on_leave_login_button
-    )
-
-    small_text_style = normal_text_style.copy()
-    small_text_style.size = 12
-
-    author_text = fantas.Text(
-        "MIT License Fantastair@2026",
-        fantas.Rect(0, login_window.size[1] - 20, login_window.size[0], 20),
-        text_style=small_text_style,
-        align_mode=fantas.AlignMode.BOTTOMRIGHT,
-        offset=(-10, 0),
-    )
-    linear_gradient_background.append(author_text)
 
     login_window.mainloop()
 

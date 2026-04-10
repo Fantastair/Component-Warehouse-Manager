@@ -41,7 +41,10 @@ files = [
 warn_unused_ignores = true
 warn_unused_configs = true
 exclude = [".venv/"]
-disable_error_code = "import-untyped"
+disable_error_code = [
+    "import-untyped",
+    "type-arg",
+]
 
 [tool.pylint.main]
 jobs = 8
