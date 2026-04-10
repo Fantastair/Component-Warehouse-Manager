@@ -27,11 +27,13 @@ def verify_token(token: str) -> bool:
     """验证API令牌"""
     return token == API_TOKEN
 
+
 app = fastapi.FastAPI(root_path="/cwm/api/v1")
+
 
 @app.post("/verify-token")
 def api_verify_token(authorization: str = Header(None)) -> dict[str, str]:
-    """ 验证令牌 """
+    """验证令牌"""
     if API_TOKEN is None:
         return {"detail": "未设置令牌，接口访问不受保护"}
     if not authorization:
@@ -40,8 +42,8 @@ def api_verify_token(authorization: str = Header(None)) -> dict[str, str]:
         token_type, token = authorization.split()
         if token_type.lower() != "bearer":
             raise HTTPException(status_code=401, detail="令牌类型错误")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="令牌格式错误")
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail="令牌格式错误") from e
     if not verify_token(token):
         raise HTTPException(status_code=401, detail="无效的令牌")
     return {"detail": "令牌验证成功"}

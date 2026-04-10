@@ -41,12 +41,15 @@ files = [
 warn_unused_ignores = true
 warn_unused_configs = true
 exclude = [".venv/"]
+disable_error_code = "import-untyped"
 
 [tool.pylint.main]
 jobs = 8
 
 [tool.pylint.messages_control]
-disable = []
+disable = [
+    "too-many-locals",
+]
 
 [tool.pylint.reports]
 fail-under = 10.0

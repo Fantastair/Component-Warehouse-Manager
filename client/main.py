@@ -1,8 +1,13 @@
+""" 前端入口 """
+
+import sys
+
 import fantas
 
 import login_window
 
-login_window.login()
+if not login_window.login():
+    sys.exit(0)
 
 window_config = fantas.WindowConfig(
     title="Fantas元件仓储管理器",

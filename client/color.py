@@ -1,4 +1,5 @@
 """ 颜色配置 """
+
 import fantas
 
 THEME = fantas.Color("#845ec2")
