@@ -8,7 +8,7 @@ import server
 login_window_config = fantas.WindowConfig(
     title="登录 - Fantas元件仓储管理器",
     window_size=(400, 220),
-    # borderless=True,
+    borderless=True,
     resizable=False,
     allow_high_dpi=False,
 )
@@ -34,7 +34,7 @@ def login() -> bool:
     )
     title_text = fantas.Text(
         "Fantas元件仓储管理器",
-        fantas.Rect(0, 0, login_window.size[0], 50),
+        fantas.Rect(0, 10, login_window.size[0], 50),
         text_style=title_text_style,
         align_mode=fantas.AlignMode.CENTER,
     )
