@@ -50,20 +50,39 @@ window.add_event_listener(
     fantas.WINDOWRESIZED, window.root_ui, False, redraw_background
 )
 
-split_line = splitline.SplitLine(
+split_line_1 = splitline.SplitLine(
     fantas.Rect(280, 0, 10, window.size[1]),
     axis="v",
     boundary=[200, window.size[0] - 200],
 )
-window.append(split_line)
-split_line.add_event_listeners(window)
+window.append(split_line_1)
+split_line_1.add_event_listeners(window)
 
 
-def split_line_dragged_callback(rect: fantas.Rect) -> None:
-    """ 分割线被拖动时的回调，调整相关UI布局 """
+split_line_2 = splitline.SplitLine(
+    fantas.Rect(
+        split_line_1.rect.right, 200, window.size[0] - split_line_1.rect.right, 10
+    ),
+    axis="h",
+    boundary=[100, window.size[1] - 100],
+)
+window.append(split_line_2)
+split_line_2.add_event_listeners(window)
+
+
+def split_line_1_dragged_callback(rect: fantas.Rect) -> None:
+    """分割线被拖动时的回调，调整相关UI布局"""
     host_text.rect.width = rect.left - 20
     host_text_shadow.rect.width = rect.left - 20
-split_line.dragged_callback = split_line_dragged_callback
+    split_line_2.rect.left = rect.right
+    split_line_2.rect.width = window.size[0] - split_line_2.rect.left
+    split_line_2.drag_bar.rect.center = (
+        split_line_2.rect.width // 2,
+        split_line_2.rect.height // 2,
+    )
+
+
+split_line_1.dragged_callback = split_line_1_dragged_callback
 
 
 host_text_style = fantas.TextStyle(
@@ -73,7 +92,7 @@ host_text_style = fantas.TextStyle(
 )
 host_text = fantas.Text(
     f"服务器：{server.HTTP_HOST}:{server.HTTP_PORT}",
-    fantas.Rect(10, 10, split_line.rect.left - 20, 60),
+    fantas.Rect(10, 10, split_line_1.rect.left - 20, 60),
     text_style=host_text_style,
     align_mode=fantas.AlignMode.TOPLEFT,
 )
