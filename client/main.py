@@ -37,18 +37,13 @@ linear_gradient = fantas.LinearGradientLabel(
 window.append(linear_gradient)
 
 
-def redraw_background(_: fantas.Event) -> bool:
+def redraw_background(_: fantas.Event) -> None:
     """重绘背景"""
     linear_gradient.rect.size = window.size
     linear_gradient.start_pos = (0, 0)
     linear_gradient.end_pos = window.size
     linear_gradient.mark_dirty()
-    return True
 
-
-window.add_event_listener(
-    fantas.WINDOWRESIZED, window.root_ui, False, redraw_background
-)
 
 split_line_1 = splitline.SplitLine(
     fantas.Rect(280, 0, 10, window.size[1]),
@@ -68,6 +63,26 @@ split_line_2 = splitline.SplitLine(
 )
 window.append(split_line_2)
 split_line_2.add_event_listeners(window)
+
+
+def redraw_split_line(_: fantas.Event) -> None:
+    """重绘分割线"""
+    split_line_1.rect.height = window.size[1]
+    split_line_1.drag_bar.rect.center = (
+        split_line_1.rect.width // 2,
+        split_line_1.rect.height // 2,
+    )
+    split_line_1.boundary[1] = window.size[0] // 2
+    split_line_1.clamp()
+
+    split_line_2.rect.left = split_line_1.rect.right
+    split_line_2.rect.width = window.size[0] - split_line_2.rect.left
+    split_line_2.drag_bar.rect.center = (
+        split_line_2.rect.width // 2,
+        split_line_2.rect.height // 2,
+    )
+    split_line_2.boundary[1] = window.size[1] - 100
+    split_line_2.clamp()
 
 
 def split_line_1_dragged_callback(rect: fantas.Rect) -> None:
@@ -96,5 +111,24 @@ host_text = fantas.Text(
     align_mode=fantas.AlignMode.TOPLEFT,
 )
 window.append(host_text)
+
+
+def on_window_resized(_: fantas.Event) -> bool:
+    """窗口大小改变时调整UI布局"""
+    size = list(window.size)
+    size[0] = max(size[0], 800)
+    size[1] = max(size[1], 450)
+    if tuple(size) != window.size:
+        window.size = tuple(size)
+
+    redraw_background(_)
+    redraw_split_line(_)
+
+    return True
+
+
+window.add_event_listener(
+    fantas.WINDOWRESIZED, window.root_ui, False, on_window_resized
+)
 
 window.mainloop()

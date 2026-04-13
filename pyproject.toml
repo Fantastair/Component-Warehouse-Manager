@@ -46,8 +46,9 @@ disable_error_code = [
     "type-arg",
 ]
 
-[tool.pylint.main]
+[tool.pylint.master]
 jobs = 8
+extension-pkg-allow-list = ["fantas._vendor.pygame.math"]
 
 [tool.pylint.messages_control]
 disable = [

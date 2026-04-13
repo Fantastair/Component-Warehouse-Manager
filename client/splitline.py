@@ -40,6 +40,17 @@ class SplitLine(fantas.Label):  # type: ignore[misc]
         self.append(self.drag_bar)
         self.drag_bar.rect.center = (self.rect.width // 2, self.rect.height // 2)
 
+    def clamp(self) -> None:
+        """将分割线位置限制在边界范围内，适用于意外超出边界后复位"""
+        if self.axis == "v":
+            self.rect.centerx = fantas.math.clamp(
+                self.rect.centerx, self.boundary[0], self.boundary[1]
+            )
+        else:
+            self.rect.centery = fantas.math.clamp(
+                self.rect.centery, self.boundary[0], self.boundary[1]
+            )
+
     def on_mouse_entered(self, event: fantas.Event) -> bool:
         """鼠标进入分割线区域，改变鼠标样式"""
         if event.ui is self:
@@ -66,10 +77,10 @@ class SplitLine(fantas.Label):  # type: ignore[misc]
         self.label_style.border_width = 2
         if self.axis == "v":
             self.label_style.border_radius = self.rect.width // 2
-            self.drag_offset = event.pos[0] - self.rect.left
+            self.drag_offset = event.pos[0] - self.rect.centerx
         else:
             self.label_style.border_radius = self.rect.height // 2
-            self.drag_offset = event.pos[1] - self.rect.top
+            self.drag_offset = event.pos[1] - self.rect.centery
         return True
 
     def on_mouse_button_up(self, _: fantas.Event) -> bool:
@@ -78,8 +89,7 @@ class SplitLine(fantas.Label):  # type: ignore[misc]
             self.dragging = False
             self.label_style.border_width = 0
             self.label_style.border_radius = 0
-            if not self.mouse_hovered:
-                fantas.set_cursor("^")
+            fantas.set_cursor("^")
             return True
         return False
 
@@ -87,17 +97,17 @@ class SplitLine(fantas.Label):  # type: ignore[misc]
         """鼠标移动时，如果正在拖动分割线，调整分割线位置"""
         if self.dragging:
             if self.axis == "v":
-                new_left = event.pos[0] - self.drag_offset
-                new_left = max(
-                    self.boundary[0], min(new_left, self.boundary[1] - self.rect.width)
+                new_centerx = event.pos[0] - self.drag_offset
+                new_centerx = fantas.math.clamp(
+                    new_centerx, self.boundary[0], self.boundary[1]
                 )
-                self.rect.left = new_left
+                self.rect.centerx = new_centerx
             else:
-                new_top = event.pos[1] - self.drag_offset
-                new_top = max(
-                    self.boundary[0], min(new_top, self.boundary[1] - self.rect.height)
+                new_centery = event.pos[1] - self.drag_offset
+                new_centery = fantas.math.clamp(
+                    new_centery, self.boundary[0], self.boundary[1]
                 )
-                self.rect.top = new_top
+                self.rect.centery = new_centery
             if self.dragged_callback is not None:
                 self.dragged_callback(self.rect)
             return True

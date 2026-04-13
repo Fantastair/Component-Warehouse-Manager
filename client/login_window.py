@@ -73,6 +73,7 @@ def login() -> bool:
     login_button.text_style.fgcolor = color.SPOT_PALETTE[0].lerp(
         color.SPOT_PALETTE[-1], 0.5
     )
+    login_button.text_style.style_flag = fantas.TEXTSTYLEFLAG_STRONG
     linear_gradient_background.append(login_button)
 
     author_text_style = info_text_style.copy()
