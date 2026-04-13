@@ -3,7 +3,18 @@
 import sqlite3
 from pathlib import Path
 
+from pydantic import BaseModel
+
 CWD = Path(__file__).parent
+
+
+class CategoryItem(BaseModel):
+    """分类数据模型"""
+
+    id: int
+    name: str
+    parent_id: int | None
+    remark: str | None
 
 
 class Database:
@@ -28,3 +39,14 @@ class Database:
         if self.connection is not None:
             self.connection.close()
             self.connection = None
+
+    def get_categories(self) -> list[CategoryItem]:
+        """获取所有分类"""
+        if self.cursor is None:
+            raise RuntimeError("数据库未连接")
+        self.cursor.execute("SELECT id, name, parent_id, remark FROM categories")
+        rows = self.cursor.fetchall()
+        return [
+            CategoryItem(id=row[0], name=row[1], parent_id=row[2], remark=row[3])
+            for row in rows
+        ]
