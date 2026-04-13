@@ -54,7 +54,7 @@ if __name__ == "__main__":
         print("正在以开发模式启动服务...")
         uvicorn.run(
             "app:app",
-            host=HTTP_HOST,
+            host=HTTP_HOST.split("://")[-1],
             port=HTTP_PORT,
             reload=True,
             log_level="debug",
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         print("正在以生产模式启动服务...")
         uvicorn.run(
             "app:app",
-            host=HTTP_HOST,
+            host=HTTP_HOST.split("://")[-1],
             port=HTTP_PORT,
             workers=PROCESS_WORKERS,
             reload=False,
