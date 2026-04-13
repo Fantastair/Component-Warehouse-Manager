@@ -53,7 +53,7 @@ window.add_event_listener(
 split_line_1 = splitline.SplitLine(
     fantas.Rect(280, 0, 10, window.size[1]),
     axis="v",
-    boundary=[200, window.size[0] - 200],
+    boundary=[200, window.size[0] // 2],
 )
 window.append(split_line_1)
 split_line_1.add_event_listeners(window)
@@ -73,7 +73,6 @@ split_line_2.add_event_listeners(window)
 def split_line_1_dragged_callback(rect: fantas.Rect) -> None:
     """分割线被拖动时的回调，调整相关UI布局"""
     host_text.rect.width = rect.left - 20
-    host_text_shadow.rect.width = rect.left - 20
     split_line_2.rect.left = rect.right
     split_line_2.rect.width = window.size[0] - split_line_2.rect.left
     split_line_2.drag_bar.rect.center = (
@@ -96,14 +95,6 @@ host_text = fantas.Text(
     text_style=host_text_style,
     align_mode=fantas.AlignMode.TOPLEFT,
 )
-host_text_shadow = fantas.Text(
-    host_text.text,
-    host_text.rect.move(2, 2),
-    text_style=host_text_style.copy(),
-    align_mode=host_text.align_mode,
-)
-host_text_shadow.text_style.fgcolor = color.GRAY
-window.append(host_text_shadow)
 window.append(host_text)
 
 window.mainloop()

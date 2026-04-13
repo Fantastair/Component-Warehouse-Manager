@@ -59,18 +59,19 @@ def login() -> bool:
     linear_gradient_background.append(info_text)
 
     login_button_style = fantas.LabelStyle(
-        bgcolor=None,
-        fgcolor=color.WHITE,
-        border_width=2,
-        border_radius=12,
+        bgcolor=color.WHITE,
+        border_radius=25,
     )
     login_button = fantas.TextLabel(
         fantas.Rect(100, info_text.rect.bottom + 20, 200, 50),
         "登录",
-        text_style=title_text_style,
+        text_style=title_text_style.copy(),
         label_style=login_button_style,
         align_mode=fantas.AlignMode.CENTER,
         box_mode=fantas.BoxMode.INOUTSIDE,
+    )
+    login_button.text_style.fgcolor = color.SPOT_PALETTE[0].lerp(
+        color.SPOT_PALETTE[-1], 0.5
     )
     linear_gradient_background.append(login_button)
 
