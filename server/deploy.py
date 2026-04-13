@@ -143,7 +143,7 @@ if choice != "y":
     sys.exit(0)
 
 print("正在启动服务...")
-APP_PATH = CWD / "app.py"
+APP_PATH = CWD / "launch_app.py"
 if not APP_PATH.exists():
     print(f"错误：未找到服务应用文件({APP_PATH})，请确保在正确的目录下运行此脚本。")
     sys.exit(1)
