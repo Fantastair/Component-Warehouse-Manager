@@ -195,6 +195,50 @@ def prep_all() -> tuple[Path, Path]:
     return poetry_path, venv_py
 
 
+def _format(venv_py: Path) -> None:
+    """格式化代码，使用 black 来统一代码风格"""
+    rich.print(mark_text(r"\[dev.py] 格式化代码中", "green"))
+    try:
+        cmd_run([venv_py, "-m", "black", "server", "client", "dev.py"])
+    except subprocess.CalledProcessError:
+        rich.print(mark_text(r"\[dev.py] 代码格式化失败，请检查错误信息", "red"))
+        sys.exit(1)
+    rich.print(mark_text(r"\[dev.py] 代码已格式化", "green"))
+
+
+def _stubs(venv_py: Path) -> None:
+    """进行静态类型检查，使用 mypy 来检查代码中的类型错误"""
+    rich.print(mark_text(r"\[dev.py] 进行静态类型检查中", "green"))
+    try:
+        cmd_run([venv_py, "-m", "mypy"])
+    except subprocess.CalledProcessError:
+        rich.print(mark_text(r"\[dev.py] 静态类型检查失败，请检查错误信息", "red"))
+        sys.exit(1)
+    rich.print(mark_text(r"\[dev.py] 静态类型检查完成", "green"))
+
+
+def _lint(venv_py: Path) -> None:
+    """进行代码质量检查，使用 pylint 来检查代码中的潜在问题和不规范的地方"""
+    rich.print(mark_text(r"\[dev.py] 进行代码质量检查中", "green"))
+    try:
+        cmd_run(
+            [
+                venv_py,
+                "-m",
+                "pylint",
+                "server",
+                "client",
+                "dev.py",
+                "--output-format=colorized",
+                "--ignore=.venv",
+            ]
+        )
+    except subprocess.CalledProcessError:
+        rich.print(mark_text(r"\[dev.py] 代码质量检查失败，请检查错误信息", "red"))
+        sys.exit(1)
+    rich.print(mark_text(r"\[dev.py] 代码质量检查完成", "green"))
+
+
 app = typer.Typer(
     help="开发相关的命令集合",
     add_completion=False,
@@ -236,50 +280,30 @@ def command(func):
 def format():  # pylint: disable=redefined-builtin
     """格式化代码"""
     _, venv_py = prep_all()
-    rich.print(mark_text(r"\[dev.py] 格式化代码中", "green"))
-    try:
-        cmd_run([venv_py, "-m", "black", "server", "client", "dev.py"])
-    except subprocess.CalledProcessError:
-        rich.print(mark_text(r"\[dev.py] 代码格式化失败，请检查错误信息", "red"))
-        sys.exit(1)
-    rich.print(mark_text(r"\[dev.py] 代码已格式化", "green"))
+    _format(venv_py)
 
 
 @command
 def stubs():
     """静态类型检查"""
     _, venv_py = prep_all()
-    rich.print(mark_text(r"\[dev.py] 进行静态类型检查中", "green"))
-    try:
-        cmd_run([venv_py, "-m", "mypy"])
-    except subprocess.CalledProcessError:
-        rich.print(mark_text(r"\[dev.py] 静态类型检查失败，请检查错误信息", "red"))
-        sys.exit(1)
-    rich.print(mark_text(r"\[dev.py] 静态类型检查完成", "green"))
+    _stubs(venv_py)
 
 
 @command
 def lint():
     """代码质量检查"""
     _, venv_py = prep_all()
-    rich.print(mark_text(r"\[dev.py] 进行代码质量检查中", "green"))
-    try:
-        cmd_run(
-            [
-                venv_py,
-                "-m",
-                "pylint",
-                "server",
-                "client",
-                "dev.py",
-                "--output-format=colorized",
-                "--ignore=.venv",
-            ]
-        )
-    except subprocess.CalledProcessError:
-        rich.print(mark_text(r"\[dev.py] 代码质量检查失败，请检查错误信息", "red"))
-        sys.exit(1)
-    rich.print(mark_text(r"\[dev.py] 代码质量检查完成", "green"))
+    _lint(venv_py)
+
+
+@command
+def all():  # pylint: disable=redefined-builtin
+    """一键运行所有检查"""
+    _, venv_py = prep_all()
+    _format(venv_py)
+    _stubs(venv_py)
+    _lint(venv_py)
 
 
 if __name__ == "__main__":
