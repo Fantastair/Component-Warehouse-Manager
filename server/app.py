@@ -117,14 +117,27 @@ def api_check_category_exists(
     return CategoryExistsResponse(exists=exists)
 
 
-@category_router.get("/search")
+@category_router.get("/name/{name}")
 def api_get_categories_by_name(
+    name: str, authorization: str = Header(None)
+) -> CategoryItem:
+    """根据名称获取分类"""
+    if not verify_token(authorization):
+        raise HTTPException(status_code=401, detail="令牌验证失败")
+    category = DB.get_categories_by_name(name)
+    if category is None:
+        raise HTTPException(status_code=404, detail="分类未找到")
+    return category
+
+
+@category_router.get("/search")
+def api_search_categories_by_name(
     name: str, authorization: str = Header(None)
 ) -> list[CategoryItem]:
     """根据名称模糊搜索分类"""
     if not verify_token(authorization):
         raise HTTPException(status_code=401, detail="令牌验证失败")
-    return DB.get_categories_by_name(name)
+    return DB.search_categories_by_name(name)
 
 
 @category_router.get("/parent")
@@ -178,8 +191,8 @@ def api_update_category(
     """更新分类"""
     if not verify_token(authorization):
         raise HTTPException(status_code=401, detail="令牌验证失败")
-    if not DB.is_category_exists(category.id):
-        raise HTTPException(status_code=404, detail="分类未找到")
+    # if not DB.is_category_exists(category.id):
+        # raise HTTPException(status_code=404, detail="分类未找到")
     DB.update_category(category)
     return DetailResponse(detail="分类更新成功")
 

@@ -70,8 +70,21 @@ class Database:
         with self:
             self.cursor.execute("SELECT 1 FROM categories WHERE id = ?", (category_id,))
             return self.cursor.fetchone() is not None
+    
+    def get_categories_by_name(self, name: str) -> CategoryItem | None:
+        """根据名称获取分类"""
+        with self:
+            self.cursor.row_factory = sqlite3.Row
+            self.cursor.execute(
+                "SELECT id, name, parent_id, remark FROM categories WHERE name = ?",
+                (name,),
+            )
+            row = self.cursor.fetchone()
+            if row is not None:
+                return CategoryItem(**row)
+            return None
 
-    def get_categories_by_name(self, name: str) -> list[CategoryItem]:
+    def search_categories_by_name(self, name: str) -> list[CategoryItem]:
         """根据名称模糊搜索分类"""
         with self:
             self.cursor.row_factory = sqlite3.Row
