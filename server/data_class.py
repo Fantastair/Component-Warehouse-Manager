@@ -8,5 +8,5 @@ class CategoryItem(BaseModel):
 
     id: int
     name: str
-    parent_id: int | None
-    remark: str | None
+    parent_id: int | None = None
+    remark: str | None = None

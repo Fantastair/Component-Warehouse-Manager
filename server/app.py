@@ -106,7 +106,7 @@ class CategoryExistsResponse(BaseModel):
     exists: bool
 
 
-@category_router.get("/exists/{category_id}")
+@category_router.get("/exists")
 def api_check_category_exists(
     category_id: int, authorization: str = Header(None)
 ) -> CategoryExistsResponse:
@@ -157,10 +157,17 @@ class AddCategoryResponse(BaseModel):
 def api_add_category(
     category: CategoryItem, authorization: str = Header(None)
 ) -> AddCategoryResponse:
-    """添加分类"""
+    """
+    添加分类
+
+    id 字段会被忽略，接口会自动生成新分类ID并返回
+    """
     if not verify_token(authorization):
         raise HTTPException(status_code=401, detail="令牌验证失败")
-    new_id = DB.add_category(category)
+    try:
+        new_id = DB.add_category(category)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return AddCategoryResponse(id=new_id)
 
 

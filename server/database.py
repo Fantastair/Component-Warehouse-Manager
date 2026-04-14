@@ -35,31 +35,34 @@ class Database:
     def get_categories(self) -> list[CategoryItem]:
         """获取所有分类"""
         with self:
+            self.cursor.row_factory = sqlite3.Row
             self.cursor.execute("SELECT id, name, parent_id, remark FROM categories")
             rows = self.cursor.fetchall()
-            return [CategoryItem(*row) for row in rows]
+            return [CategoryItem(**row) for row in rows]
 
     def get_categories_paged(self, page: int, page_size: int) -> list[CategoryItem]:
         """获取分页分类列表"""
         offset = page * page_size
         with self:
+            self.cursor.row_factory = sqlite3.Row
             self.cursor.execute(
                 "SELECT id, name, parent_id, remark FROM categories LIMIT ? OFFSET ?",
                 (page_size, offset),
             )
             rows = self.cursor.fetchall()
-            return [CategoryItem(*row) for row in rows]
+            return [CategoryItem(**row) for row in rows]
 
     def get_category_by_id(self, category_id: int) -> CategoryItem | None:
         """根据ID获取分类"""
         with self:
+            self.cursor.row_factory = sqlite3.Row
             self.cursor.execute(
                 "SELECT id, name, parent_id, remark FROM categories WHERE id = ?",
                 (category_id,),
             )
             row = self.cursor.fetchone()
             if row is not None:
-                return CategoryItem(*row)
+                return CategoryItem(**row)
             return None
 
     def is_category_exists(self, category_id: int) -> bool:
@@ -71,12 +74,13 @@ class Database:
     def get_categories_by_name(self, name: str) -> list[CategoryItem]:
         """根据名称模糊搜索分类"""
         with self:
+            self.cursor.row_factory = sqlite3.Row
             self.cursor.execute(
                 "SELECT id, name, parent_id, remark FROM categories WHERE name LIKE ?",
                 (f"%{name}%",),
             )
             rows = self.cursor.fetchall()
-            return [CategoryItem(*row) for row in rows]
+            return [CategoryItem(**row) for row in rows]
 
     def get_all_parent_categories(self, category_id: int) -> list[CategoryItem]:
         """获取指定分类的所有父级分类直至根分类"""
@@ -97,20 +101,24 @@ class Database:
     def get_all_child_categories(self, category_id: int) -> list[CategoryItem]:
         """获取指定分类的所有子级分类（不递归展开）"""
         with self:
+            self.cursor.row_factory = sqlite3.Row
             self.cursor.execute(
                 "SELECT id, name, parent_id, remark FROM categories WHERE parent_id = ?",
                 (category_id,),
             )
             rows = self.cursor.fetchall()
-            return [CategoryItem(*row) for row in rows]
+            return [CategoryItem(**row) for row in rows]
 
     def add_category(self, category: CategoryItem) -> int:
         """添加分类，返回新分类ID"""
         with self:
-            self.cursor.execute(
-                "INSERT INTO categories (name, parent_id, remark) VALUES (?, ?, ?)",
-                (category.name, category.parent_id, category.remark),
-            )
+            try:
+                self.cursor.execute(
+                    "INSERT INTO categories (name, parent_id, remark) VALUES (?, ?, ?)",
+                    (category.name, category.parent_id, category.remark),
+                )
+            except sqlite3.IntegrityError as e:
+                raise ValueError(f"分类名不能重复: {e}")
             self.conn.commit()
             if self.cursor.lastrowid is not None:
                 return self.cursor.lastrowid
