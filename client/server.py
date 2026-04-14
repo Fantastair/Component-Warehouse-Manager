@@ -83,7 +83,7 @@ def verify_token() -> bool:
         return False
 
 
-def get_categories() -> list[CategoryItem]:
+def get_categories() -> list[CategoryItem] | None:
     """获取所有分类"""
     try:
         response = requests.get(f"{BASE_URL}/categories", headers=headers, timeout=10)
