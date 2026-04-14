@@ -11,6 +11,8 @@ import requests
 
 import fantas
 
+from data_class import CategoryItem
+
 dotenv.load_dotenv()
 
 HTTP_HOST = os.getenv("HTTP_HOST", "http://127.0.0.1")
@@ -22,6 +24,8 @@ BASE_URL = f"{HTTP_HOST}:{HTTP_PORT}/cwm/api/v1"
 GET_API_RESPONSE = fantas.custom_event()
 
 requests_queue: Queue = Queue()  # 请求队列
+
+headers = {"Authorization": f"Bearer {API_TOKEN}"}  # 通用请求头
 
 
 def api_request(method: Callable, *args: tuple, **kwargs: dict) -> int:
@@ -66,17 +70,27 @@ def verify_token() -> bool:
     if not API_TOKEN:
         return False
 
-    headers = {"Authorization": f"Bearer {API_TOKEN}"}
-
     try:
         response = requests.post(
             f"{BASE_URL}/verify-token", headers=headers, timeout=10
         )
         if response.status_code == 200:
-            print(response.json().get("detail"))
             return True
-        print(f"令牌验证失败: {response.status_code} - {response.json()}")
+        print(response.json())
         return False
     except requests.RequestException as e:
         print(f"请求异常: {e}")
         return False
+
+
+def get_categories() -> list[CategoryItem]:
+    """获取所有分类"""
+    try:
+        response = requests.get(f"{BASE_URL}/categories", headers=headers, timeout=10)
+        if response.status_code == 200:
+            return [CategoryItem(**item) for item in response.json()]
+        print(f"获取分类失败: {response.status_code} - {response.json()}")
+        return None
+    except requests.RequestException as e:
+        print(f"请求异常: {e}")
+        return None

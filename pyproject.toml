@@ -40,7 +40,7 @@ files = [
 ]
 warn_unused_ignores = true
 warn_unused_configs = true
-exclude = [".venv/"]
+exclude = [".venv/", "data_class.py"]
 disable_error_code = [
     "import-untyped",
     "type-arg",

@@ -1,7 +1,6 @@
 """ 服务器应用，提供API接口供前端调用 """
 
 import os
-import atexit
 from typing import Any
 from pathlib import Path
 
@@ -9,8 +8,8 @@ import dotenv
 import fastapi
 from fastapi import Header, HTTPException
 
-import database
 from database import Database
+from data_class import CategoryItem
 
 CWD = Path(__file__).parent
 DOT_ENV_PATH = CWD / ".env"
@@ -45,14 +44,14 @@ app = fastapi.FastAPI(root_path="/cwm/api/v1")
 def api_verify_token(authorization: str = Header(None)) -> dict[str, Any]:
     """验证令牌"""
     if verify_token(authorization):
-        return {"status_code": 200, "message": "令牌验证成功"}
-    return {"status_code": 401, "message": "令牌验证失败"}
+        return {"detail": "令牌验证成功"}
+    raise HTTPException(status_code=401, detail="令牌验证失败")
 
 
 @app.get("/categories")
 def api_get_categories(
     authorization: str = Header(None),
-) -> list[database.CategoryItem]:
+) -> list[CategoryItem]:
     """获取所有分类"""
     if not verify_token(authorization):
         raise HTTPException(status_code=401, detail="令牌验证失败")
@@ -64,6 +63,3 @@ def api_get_categories(
 
 
 DB = Database(CWD / "components.db")
-DB.connect()
-
-atexit.register(DB.disconnect)
