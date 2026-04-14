@@ -180,7 +180,7 @@ def api_add_category(
     try:
         new_id = DB.add_category(category)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     return AddCategoryResponse(id=new_id)
 
 
@@ -192,7 +192,7 @@ def api_update_category(
     if not verify_token(authorization):
         raise HTTPException(status_code=401, detail="令牌验证失败")
     # if not DB.is_category_exists(category.id):
-        # raise HTTPException(status_code=404, detail="分类未找到")
+    # raise HTTPException(status_code=404, detail="分类未找到")
     DB.update_category(category)
     return DetailResponse(detail="分类更新成功")
 

@@ -53,6 +53,9 @@ extension-pkg-allow-list = ["fantas._vendor.pygame.math"]
 [tool.pylint.messages_control]
 disable = [
     "too-many-locals",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "too-many-branches",
 ]
 
 [tool.pylint.reports]

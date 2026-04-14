@@ -70,7 +70,7 @@ class Database:
         with self:
             self.cursor.execute("SELECT 1 FROM categories WHERE id = ?", (category_id,))
             return self.cursor.fetchone() is not None
-    
+
     def get_categories_by_name(self, name: str) -> CategoryItem | None:
         """根据名称获取分类"""
         with self:
@@ -131,7 +131,7 @@ class Database:
                     (category.name, category.parent_id, category.remark),
                 )
             except sqlite3.IntegrityError as e:
-                raise ValueError(f"分类名不能重复: {e}")
+                raise ValueError(f"分类名不能重复: {category.name}") from e
             self.conn.commit()
             if self.cursor.lastrowid is not None:
                 return self.cursor.lastrowid
