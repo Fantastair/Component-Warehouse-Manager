@@ -22,12 +22,25 @@ python = "^3.12"
 fastapi = { version = "^0.135.3", extras = ["standard"] }
 python-dotenv = "^1.2.2"
 requests = "^2.33.1"
+flet = "^0.84.0"
 
 [tool.poetry.group.dev.dependencies]
 typer = "^0.24.1"
 black = "^24.8.0"
 mypy = "^1.18.1"
 pylint = "^4.0.4"
+flet-cli = "^0.84.0"
+flet-desktop = "^0.84.0"
+flet-web = "^0.84.0"
+
+[tool.flet]
+org = "fantastair.cn"
+product = "Component Warehouse Manager"
+company = "Fantastair"
+copyright = "Copyright (C) 2026 by Fantastair"
+
+[tool.flet.app]
+path = "client"
 
 [tool.black]
 line-length = 88
@@ -48,7 +61,6 @@ disable_error_code = [
 
 [tool.pylint.master]
 jobs = 8
-extension-pkg-allow-list = ["fantas._vendor.pygame.math"]
 
 [tool.pylint.messages_control]
 disable = [
