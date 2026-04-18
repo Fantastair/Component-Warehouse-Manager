@@ -1,134 +1,31 @@
 """ 前端入口 """
 
-import sys
 from pathlib import Path
 
-import fantas
+import flet as ft
 
-import color
-import login_window
-import splitline
-
-import server
+from scene import SceneManager
+from login_scene import LoginScene
+from main_scene import MainScene
 
 CWD = Path(__file__).parent
 
-fantas.fonts.load(CWD / "assets" / "fonts" / "iconfont.ttf")
 
-if not login_window.login():
-    sys.exit(0)
+async def main(page: ft.Page) -> None:
+    """前端主函数"""
+    page.title = "Fantas 元件仓储管理器"
+    page.window.min_height = 450
+    page.window.min_width = 800
 
-window_config = fantas.WindowConfig(
-    title="Fantas元件仓储管理器",
-    window_size=(1280, 720),
-    resizable=True,
-    allow_high_dpi=False,
-)
+    login_scene = LoginScene()
+    main_scene = MainScene()
 
-window = fantas.Window(window_config)
+    SceneManager.init(page)
+    SceneManager.set_scene_route(login_scene, "login_success", main_scene)
+    SceneManager.set_scene_route(main_scene, "logout", login_scene)
 
-linear_gradient = fantas.LinearGradientLabel(
-    fantas.Rect((0, 0), window.size),
-    color.SPOT_PALETTE[0],
-    color.SPOT_PALETTE[-1],
-    start_pos=(0, 0),
-    end_pos=window.size,
-)
-window.append(linear_gradient)
+    SceneManager.switch_scene(login_scene)
 
 
-def redraw_background(_: fantas.Event) -> None:
-    """重绘背景"""
-    linear_gradient.rect.size = window.size
-    linear_gradient.start_pos = (0, 0)
-    linear_gradient.end_pos = window.size
-    linear_gradient.mark_dirty()
-
-
-split_line_1 = splitline.SplitLine(
-    fantas.Rect(280, 0, 10, window.size[1]),
-    axis="v",
-    boundary=[200, window.size[0] // 2],
-)
-window.append(split_line_1)
-split_line_1.add_event_listeners(window)
-
-
-split_line_2 = splitline.SplitLine(
-    fantas.Rect(
-        split_line_1.rect.right, 200, window.size[0] - split_line_1.rect.right, 10
-    ),
-    axis="h",
-    boundary=[100, window.size[1] - 100],
-)
-window.append(split_line_2)
-split_line_2.add_event_listeners(window)
-
-
-def redraw_split_line(_: fantas.Event) -> None:
-    """重绘分割线"""
-    split_line_1.rect.height = window.size[1]
-    split_line_1.drag_bar.rect.center = (
-        split_line_1.rect.width // 2,
-        split_line_1.rect.height // 2,
-    )
-    split_line_1.boundary[1] = window.size[0] // 2
-    split_line_1.clamp()
-
-    split_line_2.rect.left = split_line_1.rect.right
-    split_line_2.rect.width = window.size[0] - split_line_2.rect.left
-    split_line_2.drag_bar.rect.center = (
-        split_line_2.rect.width // 2,
-        split_line_2.rect.height // 2,
-    )
-    split_line_2.boundary[1] = window.size[1] - 100
-    split_line_2.clamp()
-
-
-def split_line_1_dragged_callback(rect: fantas.Rect) -> None:
-    """分割线被拖动时的回调，调整相关UI布局"""
-    host_text.rect.width = rect.left - 20
-    split_line_2.rect.left = rect.right
-    split_line_2.rect.width = window.size[0] - split_line_2.rect.left
-    split_line_2.drag_bar.rect.center = (
-        split_line_2.rect.width // 2,
-        split_line_2.rect.height // 2,
-    )
-
-
-split_line_1.dragged_callback = split_line_1_dragged_callback
-
-
-host_text_style = fantas.TextStyle(
-    font=fantas.fonts.DEFAULTSYSFONT,
-    size=18,
-    fgcolor=color.WHITE,
-)
-host_text = fantas.Text(
-    f"服务器：{server.HTTP_HOST}:{server.HTTP_PORT}",
-    fantas.Rect(10, 10, split_line_1.rect.left - 20, 60),
-    text_style=host_text_style,
-    align_mode=fantas.AlignMode.TOPLEFT,
-)
-window.append(host_text)
-
-
-def on_window_resized(_: fantas.Event) -> bool:
-    """窗口大小改变时调整UI布局"""
-    size = list(window.size)
-    size[0] = max(size[0], 800)
-    size[1] = max(size[1], 450)
-    if tuple(size) != window.size:
-        window.size = tuple(size)
-
-    redraw_background(_)
-    redraw_split_line(_)
-
-    return True
-
-
-window.add_event_listener(
-    fantas.WINDOWRESIZED, window.root_ui, False, on_window_resized
-)
-
-window.mainloop()
+if __name__ == "__main__":
+    ft.run(main)
