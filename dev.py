@@ -230,7 +230,7 @@ def _lint(venv_py: Path) -> None:
                 "client",
                 "dev.py",
                 "--output-format=colorized",
-                "--ignore=.venv",
+                "--ignore=.venv,build,dist",
             ]
         )
     except subprocess.CalledProcessError:
