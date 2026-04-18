@@ -199,7 +199,7 @@ async def add_category(
     仅当字符串精准匹配到一个分类时才会使用该分类作为父分类，否则视为无父分类
     """
     if isinstance(parent, str):
-        parent_categories = get_categories_by_name(parent)
+        parent_categories = await get_categories_by_name(parent)
         parent_id = parent_categories.id if parent_categories is not None else None
     else:
         parent_id = parent
@@ -248,12 +248,12 @@ async def update_category(
     update_parent 和 update_remark 参数为 True 时可以以将 parent 和 remark 字段更新为 None
     """
     if isinstance(category, str):
-        category_item = get_categories_by_name(category)
+        category_item = await get_categories_by_name(category)
         if category_item is None:
             print(f"未找到分类: {category_item}")
             return False
     else:
-        category_item = get_category_by_id(category)
+        category_item = await get_category_by_id(category)
         if category_item is None:
             print(f"未找到分类: {category_item}")
             return False
@@ -263,7 +263,7 @@ async def update_category(
 
     if parent is not None:
         if isinstance(parent, str):
-            parent_categories = get_categories_by_name(parent)
+            parent_categories = await get_categories_by_name(parent)
             category_item.parent_id = (
                 parent_categories.id if parent_categories is not None else None
             )
@@ -302,7 +302,7 @@ async def delete_category(category: int | str) -> bool:
     仅当字符串精准匹配到一个分类时才会删除该分类，否则返回 False
     """
     if isinstance(category, str):
-        category_item = get_categories_by_name(category)
+        category_item = await get_categories_by_name(category)
         if category_item is None:
             print(f"未找到分类: {category_item}")
             return False
