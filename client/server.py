@@ -1,16 +1,11 @@
 """ 客户端与服务器交互的模块，封装了API调用逻辑 """
 
 import os
-import uuid
-import threading
-from queue import Queue
+import json
 from dataclasses import asdict
-from typing import Any, Callable
 
+import httpx
 import dotenv
-import requests
-
-import fantas
 
 from data_class import CategoryItem
 
@@ -20,69 +15,30 @@ HTTP_HOST = os.getenv("HTTP_HOST", "http://127.0.0.1")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 API_TOKEN = os.getenv("API_TOKEN")
 
-BASE_URL = f"{HTTP_HOST}:{HTTP_PORT}/cwm/api/v1"
-
-GET_API_RESPONSE = fantas.custom_event()
-
-requests_queue: Queue = Queue()  # 请求队列
-
-headers = {"Authorization": f"Bearer {API_TOKEN}"}  # 通用请求头
-
-
-def api_request(method: Callable, *args: tuple, **kwargs: dict) -> int:
-    """非阻塞的API请求函数"""
-    uid = uuid.uuid4().int
-    requests_queue.put((method, uid, args, kwargs))
-    return uid
-
-
-def process_api_request(
-    method: Callable, uid: int, *args: tuple, **kwargs: dict
-) -> None:
-    """处理API请求，调用方法并处理结果"""
-    try:
-        result: Any = method(*args, **kwargs)
-        event: fantas.Event = fantas.Event(
-            GET_API_RESPONSE, {"uid": uid, "result": result}
-        )
-        fantas.event.post(event)
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        print(f"请求 {uid} 失败: {e}")
-
-
-def api_worker() -> None:
-    """API请求工作线程，处理请求队列中的请求"""
-    while True:
-        method, uid, args, kwargs = requests_queue.get()
-        t = threading.Thread(
-            target=process_api_request, args=(method, uid) + args, kwargs=kwargs
-        )
-        t.daemon = True
-        t.start()
-
-
-api_worker_thread = threading.Thread(target=api_worker)
-api_worker_thread.daemon = True
-api_worker_thread.start()
+BASE_URL = ""  # API基础URL，登录后会根据输入的服务器地址和端口设置
+headers: dict[str, str] = {}  # 全局请求头，登录后会设置Authorization字段
 
 
 # ==================== 身份认证 ====================
 
 
-def verify_token() -> bool:
+async def verify_token(host: str, port: str, api_token: str) -> bool:
     """验证API令牌"""
-    if not API_TOKEN:
-        return False
+    global headers, BASE_URL
+
+    BASE_URL = f"{host}:{port}/cwm/api/v1"
+    headers = {"Authorization": f"Bearer {api_token}"}
 
     try:
-        response = requests.post(
-            f"{BASE_URL}/verify-token", headers=headers, timeout=10
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{BASE_URL}/verify-token", headers=headers, timeout=5
+            )
         if response.status_code == 200:
             return True
         print(response.json())
         return False
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return False
 
@@ -90,140 +46,150 @@ def verify_token() -> bool:
 # ==================== 分类表相关API ====================
 
 
-def get_categories() -> list[CategoryItem] | None:
+async def get_categories() -> list[CategoryItem] | None:
     """获取所有分类"""
     try:
-        response = requests.get(f"{BASE_URL}/categories", headers=headers, timeout=10)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories", headers=headers, timeout=5
+            )
         if response.status_code == 200:
             return [CategoryItem(**item) for item in response.json()]
         print(f"获取分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def get_categories_paged(page: int, page_size: int) -> list[CategoryItem] | None:
+async def get_categories_paged(page: int, page_size: int) -> list[CategoryItem] | None:
     """获取分页分类列表"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/paged",
-            headers=headers,
-            params={"page": page, "page_size": page_size},
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/paged",
+                headers=headers,
+                params={"page": page, "page_size": page_size},
+                timeout=5,
+            )
         if response.status_code == 200:
             return [CategoryItem(**item) for item in response.json()]
         print(f"获取分页分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def get_category_by_id(category_id: int) -> CategoryItem | None:
+async def get_category_by_id(category_id: int) -> CategoryItem | None:
     """根据ID获取分类"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/id/{category_id}", headers=headers, timeout=10
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/id/{category_id}", headers=headers, timeout=5
+            )
         if response.status_code == 200:
             return CategoryItem(**response.json())
         print(f"获取分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def is_category_exists(category_id: int) -> bool | None:
+async def is_category_exists(category_id: int) -> bool | None:
     """检查分类是否存在"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/exists",
-            headers=headers,
-            params={"category_id": category_id},
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/exists",
+                headers=headers,
+                params={"category_id": category_id},
+                timeout=5,
+            )
         if response.status_code == 200:
             return response.json().get("exists", False)  # type: ignore[no-any-return]
         print(f"检查分类存在失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def get_categories_by_name(name: str) -> CategoryItem | None:
+async def get_categories_by_name(name: str) -> CategoryItem | None:
     """根据名称获取分类"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/name/{name}", headers=headers, timeout=10
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/name/{name}", headers=headers, timeout=5
+            )
         if response.status_code == 200:
             return CategoryItem(**response.json())
         print(f"获取分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def search_categories_by_name(name: str) -> list[CategoryItem] | None:
+async def search_categories_by_name(name: str) -> list[CategoryItem] | None:
     """根据名称获取分类列表"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/search",
-            headers=headers,
-            params={"name": name},
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/search",
+                headers=headers,
+                params={"name": name},
+                timeout=5,
+            )
         if response.status_code == 200:
             return [CategoryItem(**item) for item in response.json()]
         print(f"获取分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def get_all_parent_categories(category_id: int) -> list[CategoryItem] | None:
+async def get_all_parent_categories(category_id: int) -> list[CategoryItem] | None:
     """获取指定分类的所有父级分类直至根分类"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/parent",
-            headers=headers,
-            params={"category_id": category_id},
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/parent",
+                headers=headers,
+                params={"category_id": category_id},
+                timeout=5,
+            )
         if response.status_code == 200:
             return [CategoryItem(**item) for item in response.json()]
         print(f"获取父级分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def get_all_child_categories(category_id: int) -> list[CategoryItem] | None:
+async def get_all_child_categories(category_id: int) -> list[CategoryItem] | None:
     """获取指定分类的所有子分类（不递归展开）"""
     try:
-        response = requests.get(
-            f"{BASE_URL}/categories/child",
-            headers=headers,
-            params={"category_id": category_id},
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{BASE_URL}/categories/child",
+                headers=headers,
+                params={"category_id": category_id},
+                timeout=5,
+            )
         if response.status_code == 200:
             return [CategoryItem(**item) for item in response.json()]
         print(f"获取子级分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def add_category(
+async def add_category(
     name: str, parent: int | str | None = None, remark: str | None = None
 ) -> int | None:
     """
@@ -245,22 +211,23 @@ def add_category(
     )
 
     try:
-        response = requests.post(
-            f"{BASE_URL}/categories/add",
-            headers=headers,
-            json=asdict(category),
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{BASE_URL}/categories/add",
+                headers=headers,
+                json=asdict(category),
+                timeout=5,
+            )
         if response.status_code == 200:
             return response.json().get("id")  # type: ignore[no-any-return]
         print(f"添加分类失败: {response.status_code} - {response.json()}")
         return None
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return None
 
 
-def update_category(
+async def update_category(
     category: int | str,
     name: str | None = None,
     parent: int | str | None = None,
@@ -311,22 +278,23 @@ def update_category(
         category_item.remark = None
 
     try:
-        response = requests.post(
-            f"{BASE_URL}/categories/update",
-            headers=headers,
-            json=asdict(category_item),
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{BASE_URL}/categories/update",
+                headers=headers,
+                json=asdict(category_item),
+                timeout=5,
+            )
         if response.status_code == 200:
             return True
         print(f"更新分类失败: {response.status_code} - {response.json()}")
         return False
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return False
 
 
-def delete_category(category: int | str) -> bool:
+async def delete_category(category: int | str) -> bool:
     """
     删除分类
 
@@ -343,16 +311,17 @@ def delete_category(category: int | str) -> bool:
         category_id = category
 
     try:
-        response = requests.post(
-            f"{BASE_URL}/categories/delete",
-            headers=headers,
-            params={"category_id": category_id},
-            timeout=10,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{BASE_URL}/categories/delete",
+                headers=headers,
+                params={"category_id": category_id},
+                timeout=5,
+            )
         if response.status_code == 200:
             return True
         print(f"删除分类失败: {response.status_code} - {response.json()}")
         return False
-    except requests.RequestException as e:
+    except (httpx.HTTPError, json.decoder.JSONDecodeError) as e:
         print(f"请求异常: {e}")
         return False
