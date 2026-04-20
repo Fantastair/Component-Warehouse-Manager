@@ -5,7 +5,7 @@
 import flet as ft
 
 from scene import Scene, SceneManager
-import server
+import serverapi
 
 
 @ft.control
@@ -26,11 +26,11 @@ class LoginScene(ft.Container, Scene):
             alignment=ft.MainAxisAlignment.CENTER,
             tight=True,
         )
-        self.host_input = ft.TextField(label="服务器地址", value=server.HTTP_HOST)
-        self.port_input = ft.TextField(label="服务器端口", value=str(server.HTTP_PORT))
+        self.host_input = ft.TextField(label="服务器地址", value=serverapi.HTTP_HOST)
+        self.port_input = ft.TextField(label="服务器端口", value=str(serverapi.HTTP_PORT))
         self.token_input = ft.TextField(
             label="访问令牌",
-            value=server.API_TOKEN if server.API_TOKEN is not None else "",
+            value=serverapi.API_TOKEN if serverapi.API_TOKEN is not None else "",
             password=True,
             can_reveal_password=True,
         )
@@ -102,7 +102,7 @@ class LoginScene(ft.Container, Scene):
         self.update()
 
         try:
-            result = await server.verify_token(
+            result = await serverapi.verify_token(
                 self.host_input.value, self.port_input.value, self.token_input.value
             )
             if result:

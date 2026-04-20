@@ -16,7 +16,7 @@ HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 API_TOKEN = os.getenv("API_TOKEN")
 
 BASE_URL = ""  # API基础URL，登录后会根据输入的服务器地址和端口设置
-headers: dict[str, str] = {}  # 全局请求头，登录后会设置Authorization字段
+HEADERS: dict[str, str] = {}  # 全局请求头，登录后会设置Authorization字段
 
 
 # ==================== 身份认证 ====================
@@ -24,15 +24,15 @@ headers: dict[str, str] = {}  # 全局请求头，登录后会设置Authorizatio
 
 async def verify_token(host: str, port: str, api_token: str) -> bool:
     """验证API令牌"""
-    global headers, BASE_URL
+    global HEADERS, BASE_URL
 
     BASE_URL = f"{host}:{port}/cwm/api/v1"
-    headers = {"Authorization": f"Bearer {api_token}"}
+    HEADERS = {"Authorization": f"Bearer {api_token}"}
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{BASE_URL}/verify-token", headers=headers, timeout=5
+                f"{BASE_URL}/verify-token", headers=HEADERS, timeout=5
             )
         if response.status_code == 200:
             return True
@@ -51,7 +51,7 @@ async def get_categories() -> list[CategoryItem] | None:
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{BASE_URL}/categories", headers=headers, timeout=5
+                f"{BASE_URL}/categories", headers=HEADERS, timeout=5
             )
         if response.status_code == 200:
             return [CategoryItem(**item) for item in response.json()]
@@ -68,7 +68,7 @@ async def get_categories_paged(page: int, page_size: int) -> list[CategoryItem] 
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{BASE_URL}/categories/paged",
-                headers=headers,
+                headers=HEADERS,
                 params={"page": page, "page_size": page_size},
                 timeout=5,
             )
@@ -86,7 +86,7 @@ async def get_category_by_id(category_id: int) -> CategoryItem | None:
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{BASE_URL}/categories/id/{category_id}", headers=headers, timeout=5
+                f"{BASE_URL}/categories/id/{category_id}", headers=HEADERS, timeout=5
             )
         if response.status_code == 200:
             return CategoryItem(**response.json())
@@ -103,7 +103,7 @@ async def is_category_exists(category_id: int) -> bool | None:
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{BASE_URL}/categories/exists",
-                headers=headers,
+                headers=HEADERS,
                 params={"category_id": category_id},
                 timeout=5,
             )
@@ -121,7 +121,7 @@ async def get_categories_by_name(name: str) -> CategoryItem | None:
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{BASE_URL}/categories/name/{name}", headers=headers, timeout=5
+                f"{BASE_URL}/categories/name/{name}", headers=HEADERS, timeout=5
             )
         if response.status_code == 200:
             return CategoryItem(**response.json())
@@ -138,7 +138,7 @@ async def search_categories_by_name(name: str) -> list[CategoryItem] | None:
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{BASE_URL}/categories/search",
-                headers=headers,
+                headers=HEADERS,
                 params={"name": name},
                 timeout=5,
             )
@@ -157,7 +157,7 @@ async def get_all_parent_categories(category_id: int) -> list[CategoryItem] | No
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{BASE_URL}/categories/parent",
-                headers=headers,
+                headers=HEADERS,
                 params={"category_id": category_id},
                 timeout=5,
             )
@@ -176,7 +176,7 @@ async def get_all_child_categories(category_id: int) -> list[CategoryItem] | Non
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{BASE_URL}/categories/child",
-                headers=headers,
+                headers=HEADERS,
                 params={"category_id": category_id},
                 timeout=5,
             )
@@ -214,7 +214,7 @@ async def add_category(
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{BASE_URL}/categories/add",
-                headers=headers,
+                headers=HEADERS,
                 json=asdict(category),
                 timeout=5,
             )
@@ -281,7 +281,7 @@ async def update_category(
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{BASE_URL}/categories/update",
-                headers=headers,
+                headers=HEADERS,
                 json=asdict(category_item),
                 timeout=5,
             )
@@ -314,7 +314,7 @@ async def delete_category(category: int | str) -> bool:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{BASE_URL}/categories/delete",
-                headers=headers,
+                headers=HEADERS,
                 params={"category_id": category_id},
                 timeout=5,
             )
