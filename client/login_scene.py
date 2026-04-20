@@ -27,7 +27,9 @@ class LoginScene(ft.Container, Scene):
             tight=True,
         )
         self.host_input = ft.TextField(label="服务器地址", value=serverapi.HTTP_HOST)
-        self.port_input = ft.TextField(label="服务器端口", value=str(serverapi.HTTP_PORT))
+        self.port_input = ft.TextField(
+            label="服务器端口", value=str(serverapi.HTTP_PORT)
+        )
         self.token_input = ft.TextField(
             label="访问令牌",
             value=serverapi.API_TOKEN if serverapi.API_TOKEN is not None else "",

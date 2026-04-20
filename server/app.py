@@ -117,7 +117,7 @@ def api_check_category_exists(
     return CategoryExistsResponse(exists=exists)
 
 
-@category_router.get("/name/{name}")
+@category_router.get("/name")
 def api_get_categories_by_name(
     name: str, authorization: str = Header(None)
 ) -> CategoryItem:
