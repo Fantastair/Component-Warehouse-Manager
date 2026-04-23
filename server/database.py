@@ -150,4 +150,8 @@ class Database:
         """删除分类"""
         with self:
             self.cursor.execute("DELETE FROM categories WHERE id = ?", (category_id,))
+            self.cursor.execute(
+                "UPDATE categories SET parent_id = NULL WHERE parent_id = ?",
+                (category_id,),
+            )
             self.conn.commit()
