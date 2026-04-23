@@ -1,8 +1,10 @@
 """轻量信息通知"""
 
+# pylint: disable=unexpected-keyword-arg
+
 import flet as ft
 
-snack_bar = ft.SnackBar(  # pylint: disable=unexpected-keyword-arg
+snack_bar = ft.SnackBar(
     "Fantastair",
     show_close_icon=True,
     duration=1000,
@@ -22,4 +24,7 @@ def show_message(message: str, bgcolor: ft.ColorValue | None = None) -> None:
     snack_bar.content = message
     if bgcolor is not None:
         snack_bar.bgcolor = bgcolor
-    page.show_dialog(snack_bar)
+    try:
+        page.show_dialog(snack_bar)
+    except RuntimeError:
+        pass
