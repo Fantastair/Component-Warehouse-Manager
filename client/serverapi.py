@@ -121,7 +121,10 @@ async def get_categories_by_name(name: str) -> CategoryItem | None:
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{BASE_URL}/categories/name", headers=HEADERS, timeout=5, params={"name": name}
+                f"{BASE_URL}/categories/name",
+                headers=HEADERS,
+                timeout=5,
+                params={"name": name},
             )
         if response.status_code == 200:
             return CategoryItem(**response.json())

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import flet as ft
 
+import lite_message
 from scene import SceneManager
 from login_scene import LoginScene
 from main_scene import MainScene
@@ -16,6 +17,8 @@ async def main(page: ft.Page) -> None:
     page.title = "Fantas 元件仓储管理器"
     page.window.min_height = 450
     page.window.min_width = 800
+
+    lite_message.init(page)
 
     login_scene = LoginScene()
     main_scene = MainScene()

@@ -4,8 +4,9 @@
 
 import flet as ft
 
-from scene import Scene, SceneManager
 import serverapi
+import lite_message
+from scene import Scene, SceneManager
 
 
 @ft.control
@@ -108,24 +109,10 @@ class LoginScene(ft.Container, Scene):
                 self.host_input.value, self.port_input.value, self.token_input.value
             )
             if result:
-                self.page.show_dialog(
-                    ft.SnackBar(
-                        ft.Text("身份验证成功！"),
-                        bgcolor=ft.Colors.GREEN_400,
-                        show_close_icon=True,
-                        duration=1000,
-                    )
-                )
+                lite_message.show_message("身份验证成功！", ft.Colors.GREEN_400)
                 SceneManager.walk(self, "login_success")
             else:
-                self.page.show_dialog(
-                    ft.SnackBar(
-                        ft.Text("身份验证失败！"),
-                        bgcolor=ft.Colors.RED_400,
-                        show_close_icon=True,
-                        duration=1000,
-                    )
-                )
+                lite_message.show_message("身份验证失败！", ft.Colors.RED_400)
         finally:
             self.logining_ring.visible = False  # 隐藏加载动画
             self.login_button.disabled = False  # 启用登录按钮
