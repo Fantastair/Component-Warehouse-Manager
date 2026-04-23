@@ -140,10 +140,13 @@ class Database:
     def update_category(self, category: CategoryItem) -> None:
         """更新分类"""
         with self:
-            self.cursor.execute(
-                "UPDATE categories SET name = ?, parent_id = ?, remark = ? WHERE id = ?",
-                (category.name, category.parent_id, category.remark, category.id),
-            )
+            try:
+                self.cursor.execute(
+                    "UPDATE categories SET name = ?, parent_id = ?, remark = ? WHERE id = ?",
+                    (category.name, category.parent_id, category.remark, category.id),
+                )
+            except sqlite3.IntegrityError as e:
+                raise ValueError(f"分类名不能重复: {category.name}") from e
             self.conn.commit()
 
     def delete_category(self, category_id: int) -> None:
